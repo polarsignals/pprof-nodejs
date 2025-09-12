@@ -1,0 +1,36 @@
+{
+  "name": "@polarsignals/pprof",
+  "version": "0.1.0",
+  "description": "Node.js profiling library that automatically uploads heap profiles to Polar Signals",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "example": "node example.js"
+  },
+  "keywords": [
+    "profiling",
+    "pprof",
+    "heap",
+    "memory",
+    "performance",
+    "polar-signals",
+    "observability"
+  ],
+  "author": "Polar Signals",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/polarsignals/pprof-nodejs.git"
+  },
+  "bugs": {
+    "url": "https://github.com/polarsignals/pprof-nodejs/issues"
+  },
+  "homepage": "https://github.com/polarsignals/pprof-nodejs#readme",
+  "packageManager": "pnpm@10.10.0",
+  "dependencies": {
+    "@datadog/pprof": "^5.10.0"
+  },
+  "optionalDependencies": {
+    "express": "^4.21.2"
+  }
+}
