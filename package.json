@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "Node.js profiling library that automatically uploads heap profiles to Polar Signals",
   "main": "index.js",
+  "files": [
+    "*.js",
+    "*.ts"
+  ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "example": "node example.js"
@@ -29,6 +33,10 @@
   "packageManager": "pnpm@10.10.0",
   "dependencies": {
     "@datadog/pprof": "^5.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "typescript": "^5.9.3"
   },
   "optionalDependencies": {
     "express": "^4.21.2"
