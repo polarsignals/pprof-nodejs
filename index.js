@@ -1,5 +1,5 @@
 const path = require('node:path');
-const { encode, heap } = require('@datadog/pprof');
+const { SourceMapper, encode, heap } = require('@datadog/pprof');
 const { Mapping } = require('pprof-format');
 const { debugIdFor } = require('./debug-ids');
 
@@ -20,7 +20,7 @@ const COLUMN_ENCODING_SOURCE_MAPPER = {
 
 // Tag JS frames with a v8js Mapping + build_id so consumers can resolve them
 // against the matching sourcemap.
-function injectBuildIds(profile) {
+function addBuildIdMappings(profile) {
   const st = profile.stringTable;
   const v8jsFilenameId = st.dedup('v8js');
   const pathToMappingId = new Map();
@@ -54,22 +54,34 @@ function injectBuildIds(profile) {
   }
 }
 
-async function encodeWithBuildIds(profile) {
-  injectBuildIds(profile);
-  return await encode(profile);
+// Returns { mapper, injectBuildIds } depending on whether the caller wants
+// local sourcemap resolution or server-side resolution.
+async function pickEncodeMode(options) {
+  if (options?.localSourceMapRoots) {
+    return {
+      mapper: await SourceMapper.create(options.localSourceMapRoots),
+      injectBuildIds: false,
+    };
+  }
+  return { mapper: COLUMN_ENCODING_SOURCE_MAPPER, injectBuildIds: true };
+}
+
+async function finalize(profile, injectBuildIds) {
+  if (injectBuildIds) addBuildIdMappings(profile);
+  return encode(profile);
 }
 
 module.exports = {
   heapProfiler: {
     ...heap,
-    async encodedProfile() {
-      return encodeWithBuildIds(heap.profile('', COLUMN_ENCODING_SOURCE_MAPPER));
+    async encodedProfile(options) {
+      const { mapper, injectBuildIds } = await pickEncodeMode(options);
+      return finalize(await heap.profile('', mapper), injectBuildIds);
     },
   },
-  async encodedProfileFromTree(rootNode) {
-    return encodeWithBuildIds(
-      heap.convertProfile(rootNode, undefined, COLUMN_ENCODING_SOURCE_MAPPER),
-    );
+  async encodedProfileFromTree(rootNode, options) {
+    const { mapper, injectBuildIds } = await pickEncodeMode(options);
+    return finalize(heap.convertProfile(rootNode, undefined, mapper), injectBuildIds);
   },
   monitorOutOfMemory(config = {}) {
     heap.monitorOutOfMemory(

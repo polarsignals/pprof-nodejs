@@ -7,7 +7,6 @@
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const path = require('path');
 const { URL } = require('url');
 const { encodedProfileFromTree } = require('./index');
 
@@ -19,7 +18,9 @@ async function uploadProfile (profilePath, config) {
     }
 
     const profileDataJSON = JSON.parse(fs.readFileSync(profilePath));
-    const encodedProfile = await encodedProfileFromTree(profileDataJSON);
+    const encodedProfile = await encodedProfileFromTree(profileDataJSON, {
+      localSourceMapRoots: config.localSourceMapRoots,
+    });
       
     // Prepare Parca WriteRaw request
     const defaultLabels = [
