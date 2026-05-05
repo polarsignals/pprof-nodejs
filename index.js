@@ -54,14 +54,22 @@ function injectBuildIds(profile) {
   }
 }
 
+async function encodeWithBuildIds(profile) {
+  injectBuildIds(profile);
+  return await encode(profile);
+}
+
 module.exports = {
   heapProfiler: {
     ...heap,
     async encodedProfile() {
-      const profile = heap.profile('', COLUMN_ENCODING_SOURCE_MAPPER);
-      injectBuildIds(profile);
-      return await encode(profile);
+      return encodeWithBuildIds(heap.profile('', COLUMN_ENCODING_SOURCE_MAPPER));
     },
+  },
+  async encodedProfileFromTree(rootNode) {
+    return encodeWithBuildIds(
+      heap.convertProfile(rootNode, undefined, COLUMN_ENCODING_SOURCE_MAPPER),
+    );
   },
   monitorOutOfMemory(config = {}) {
     heap.monitorOutOfMemory(

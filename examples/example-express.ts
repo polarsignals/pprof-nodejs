@@ -20,6 +20,7 @@ monitorOutOfMemory({
     labels: {
       service: 'express-example',
       version: '1.0.0',
+      oom: 'true',
     },
   },
 });
