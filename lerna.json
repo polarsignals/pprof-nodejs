@@ -1,0 +1,15 @@
+{
+  "version": "independent",
+  "npmClient": "pnpm",
+  "tagVersionPrefix": "v",
+  "command": {
+    "publish": {
+      "conventionalCommits": true,
+      "provenance": true
+    },
+    "version": {
+      "allowBranch": "main"
+    }
+  },
+  "$schema": "node_modules/lerna/schemas/lerna-schema.json"
+}
