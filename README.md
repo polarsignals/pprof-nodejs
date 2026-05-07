@@ -44,7 +44,7 @@ typical deployments don't need to set them in code.
 | `labels`              | `Record<string, string>` | —                                                    | Extra series labels attached to the profile (e.g. `service`, `version`).                                                                          |
 | `headers`             | `Record<string, string>` | —                                                    | Extra HTTP headers added to the upload request.                                                                                                   |
 | `timeout`             | `number`                 | `30000`                                              | Request timeout in ms.                                                                                                                            |
-| `localSourceMapRoots` | `string[]`               | —                                                    | If set, the OOM upload-worker resolves frames against `.map` files in these dirs and skips server-side resolution.                                 |
+| `localSourceMapRoots` | `string[]`               | —                                                    | If set, the OOM upload-worker resolves frames against `.map` files in these dirs and skips server-side resolution. The same option is available on `heapProfiler.encodedProfile` — see below. |
 
 The bearer token is read exclusively from `POLARSIGNALS_TOKEN` env var.
 
