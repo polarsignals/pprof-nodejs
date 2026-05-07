@@ -7,9 +7,8 @@
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
-const path = require('path');
 const { URL } = require('url');
-const { SourceMapper, heap, encode } = require('@datadog/pprof')
+const { encodedProfileFromTree } = require('./index');
 
 async function uploadProfile (profilePath, config) {
   try {
@@ -19,15 +18,9 @@ async function uploadProfile (profilePath, config) {
     }
 
     const profileDataJSON = JSON.parse(fs.readFileSync(profilePath));
-
-    let mapper
-    try {
-      mapper = await SourceMapper.create([process.cwd()])
-    } catch (err) {
-      console.error(err)
-    }
-
-    const encodedProfile = await encode(heap.convertProfile(profileDataJSON, undefined, mapper))
+    const encodedProfile = await encodedProfileFromTree(profileDataJSON, {
+      localSourceMapRoots: config.localSourceMapRoots,
+    });
       
     // Prepare Parca WriteRaw request
     const defaultLabels = [
@@ -52,16 +45,20 @@ async function uploadProfile (profilePath, config) {
     };
 
     const payloadJson = JSON.stringify(requestPayload);
-    const endpoint = config.endpoint || 'https://api.polarsignals.com/api/parca/profilestore';
+    const endpoint = config.endpoint
+      ?? process.env.POLARSIGNALS_SERVER_URL
+      ?? 'https://api.polarsignals.com/api/parca/profilestore';
+    const projectId = config.projectId ?? process.env.POLARSIGNALS_PROJECT_ID;
+    const bearerToken = process.env.POLARSIGNALS_TOKEN;
     const url = new URL(endpoint);
     const isHttps = url.protocol === 'https:';
     const client = isHttps ? https : http;
-    const bearerToken = process.env.POLAR_SIGNALS_TOKEN;
 
     const headers = {
       'Content-Type': 'application/json',
       'Content-Length': Buffer.byteLength(payloadJson).toString(),
       ...(bearerToken ? { 'Authorization': `Bearer ${bearerToken}` } : {}),
+      ...(projectId ? { 'Grpc-Metadata-projectid': projectId } : {}),
       ...config.headers,
     };
 
